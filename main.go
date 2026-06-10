@@ -42,9 +42,9 @@ func run(ctx context.Context, cancel context.CancelFunc, httpPort int, dataDir s
 	}
 
 	s := newServer(*st, httpPort, cancel, logger)
-	var serverErr error
+	serverErrCh := make(chan error, 1)
 	go func() {
-		serverErr = s.start()
+		serverErrCh <- s.start()
 	}()
 
 	<-ctx.Done()
@@ -56,6 +56,7 @@ func run(ctx context.Context, cancel context.CancelFunc, httpPort int, dataDir s
 		logger.Printf("failed to shutdown server: %v", err)
 		return 1
 	}
+	serverErr := <-serverErrCh
 	if serverErr != nil {
 		logger.Printf("server error: %v", serverErr)
 		return 1
