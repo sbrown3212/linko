@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"time"
 
 	"boot.dev/linko/internal/store"
 )
@@ -65,11 +66,14 @@ func (s *server) shutdown(ctx context.Context) error {
 func requestLogger(logger *slog.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			start := time.Now()
 			next.ServeHTTP(w, r)
+
 			logger.Info("Served request",
 				slog.String("method", r.Method),
 				slog.String("path", r.URL.Path),
 				slog.String("client_ip", r.RemoteAddr),
+				slog.Duration("duration", time.Since(start)),
 			)
 		})
 	}
