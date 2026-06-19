@@ -31,10 +31,14 @@ func main() {
 }
 
 func run(ctx context.Context, cancel context.CancelFunc, httpPort int, dataDir string) int {
+	env := os.Getenv("ENV")
+	hostname, _ := os.Hostname()
 	logger, closeLogger, err := initializeLogger(os.Getenv("LINKO_LOG_FILE"))
 	logger = logger.With(
 		slog.String("git_sha", build.GitSHA),
 		slog.String("build_time", build.BuildTime),
+		slog.String("env", env),
+		slog.String("hostname", hostname),
 	)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to initialize logger: %v\n", err)
