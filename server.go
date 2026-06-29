@@ -103,21 +103,16 @@ type LogContext struct {
 	Error    error
 }
 
-var sensitiveHTTPStatusCodes = map[int]struct{}{
-	401: {},
-	403: {},
-	500: {},
-}
-
 func httpError(ctx context.Context, w http.ResponseWriter, status int, err error) {
 	if logCtx, ok := ctx.Value(logContextKey).(*LogContext); ok {
 		logCtx.Error = err
 	}
-	if _, ok := sensitiveHTTPStatusCodes[status]; ok {
-		http.Error(w, http.StatusText(status), status)
-		return
+	msg := err.Error()
+	switch status {
+	case http.StatusUnauthorized, http.StatusForbidden, http.StatusInternalServerError:
+		msg = http.StatusText(status)
 	}
-	http.Error(w, err.Error(), status)
+	http.Error(w, msg, status)
 }
 
 func requestLogger(logger *slog.Logger) func(http.Handler) http.Handler {
