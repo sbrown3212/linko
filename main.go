@@ -98,7 +98,7 @@ func initializeLogger(filename string) (*slog.Logger, closeFunc, error) {
 	if filename != "" {
 		logger := &lumberjack.Logger{
 			Filename:   filename,
-			MaxSize:    1,
+			MaxSize:    500,
 			MaxAge:     28,
 			MaxBackups: 10,
 			LocalTime:  false,
